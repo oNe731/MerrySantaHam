@@ -489,10 +489,12 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/unity,windows,visualstudio
 
-**/Data/
-**/Library/
+**/TextMesh Pro/
 **/Resources/
+**/Library/
+**/Data/
 **/StreamingAssets/
+
 *.ttf
 *.otf
 *.jpg
