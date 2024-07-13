@@ -12,6 +12,7 @@ public class Hamster : MonoBehaviour
     private StateMachine<Hamster> m_stateMachine;
     private OrderSheets m_orderSheets;
     private Inventory m_inventory;
+    private Rigidbody m_rigidbody;
 
     public bool IsGrounded => m_isGrounded;
     public int life => m_life;
@@ -31,6 +32,7 @@ public class Hamster : MonoBehaviour
 
         m_orderSheets = gameObject.AddComponent<OrderSheets>();
         m_inventory = gameObject.AddComponent<Inventory>();
+        m_rigidbody = gameObject.GetComponent<Rigidbody>();
     }
 
     public void Update()
@@ -41,27 +43,6 @@ public class Hamster : MonoBehaviour
         m_stateMachine.Update_State();
 
         Check_Ground();
-
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Cloud, 1));
-        }
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Fish, 1));
-        }
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Person, 1));
-        }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Strawberry, 1));
-        }
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Tree, 1));
-        }
     }
 
     private void Check_Ground()
@@ -72,6 +53,8 @@ public class Hamster : MonoBehaviour
 
         RaycastHit hit;
         m_isGrounded = Physics.Raycast(origin, direction, out hit, distance, LayerMask.GetMask("Ground"));
+        if(m_isGrounded == false)
+            m_rigidbody.velocity += Physics.gravity * Time.deltaTime * 300f; // 떨어지는 속도 : 300f
 
 #if UNITY_EDITOR
         Debug.DrawRay(origin, direction * distance, Color.red);
@@ -85,5 +68,25 @@ public class Hamster : MonoBehaviour
         {
             GameManager.Ins.Over_Game();
         }
+    }
+
+    public void Jump_Player()
+    {
+        if (GameManager.Ins.Player.IsGrounded == false)
+            return;
+
+        m_rigidbody.AddForce(Vector3.up * Random.Range(100f, 300f), ForceMode.Impulse); // 점프 높이 : 100f - 300f;
+        Debug.Log("점프");
+    }
+
+    public void Add_Acceleration()
+    {
+        if (GameManager.Ins.Player.IsGrounded == false)
+            return;
+
+        Vector3 velocity = m_rigidbody.velocity;
+        velocity.y = 0f;
+        m_rigidbody.AddForce(velocity * 100f);
+        Debug.Log("가속");
     }
 }

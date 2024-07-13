@@ -70,4 +70,13 @@ public class InvenSlot
         if (m_uIItem != null)
             GameManager.Ins.Destroy_GameObject(ref m_uIItem);
     }
+
+    public void Use_Item()
+    {
+        m_item.count--;
+        if(m_item.count <= 0)
+            Reset_Slot();
+        else
+            m_uIItem.GetComponent<UIItem>().Set_Info(m_item);
+    }
 }

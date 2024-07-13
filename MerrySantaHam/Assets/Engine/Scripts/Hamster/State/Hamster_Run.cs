@@ -7,7 +7,9 @@ public class Hamster_Run : State<Hamster>
     private bool m_isLock = false;
 
     private float m_moveSpeed = 20.0f;
-    private float m_lerpSpeed = 5.0f;
+
+    private float m_currentTime = 0f;
+    private float m_maxTime = 1f;
 
     private Rigidbody m_rigidbody;
 
@@ -18,7 +20,8 @@ public class Hamster_Run : State<Hamster>
 
     public override void Enter_State()
     {
-        GameManager.Ins.Player.OrderSheets.Add_Order();
+        GameObject.Find("Canvas").transform.GetChild(1).gameObject.SetActive(true);
+        GameManager.Ins.Player.OrderSheets.Start_Orders();
     }
 
     public override void Update_State()
@@ -33,40 +36,26 @@ public class Hamster_Run : State<Hamster>
 
     private void Input_Player()
     {
-        // 회전
-        //transform.rotation = Camera.main.transform.rotation;
+        // 일정 시간 이상 입력받지 않을 시
+        //if (m_currentTime >= m_maxTime)
+        //{
+        //    m_rigidbody.velocity = Vector3.zero;
+        //    GameManager.Ins.Over_Game();
+        //    return;
+        //}
 
         float inputX = Input.GetAxis("Horizontal");
         float inputZ = Input.GetAxis("Vertical");
-        m_rigidbody.velocity = new Vector3(inputX, 0, inputZ) * m_moveSpeed;
+        Vector3 moveDirection = new Vector3(inputX, 0, inputZ).normalized;
 
-        // 이동
-        //Vector3 Velocity = Vector3.zero;
-        //if (Input.GetKey(KeyCode.W))
-        //    Velocity += transform.forward * m_moveSpeed * Time.deltaTime;
-        //else if (Input.GetKey(KeyCode.S))
-        //    Velocity += -transform.forward * m_moveSpeed * Time.deltaTime;
+        m_rigidbody.velocity = moveDirection * m_moveSpeed;
 
-        //if (Input.GetKey(KeyCode.D))
-        //    Velocity += transform.right * m_moveSpeed * Time.deltaTime;
-        //else if (Input.GetKey(KeyCode.A))
-        //    Velocity += -transform.right * m_moveSpeed * Time.deltaTime;
-
-        //if (Velocity == Vector3.zero)
-        //{
-        //    //m_rigidbody.isKinematic = true;
-        //}
-        //else
-        //{
-        //    //m_rigidbody.isKinematic = false;
-        //    m_rigidbody.velocity = Vector3.Lerp(m_rigidbody.velocity, Velocity, Time.deltaTime * m_lerpSpeed);
-        //}
-    }
-
-    public void Set_Lock(bool isLock)
-    {
-        m_isLock = isLock;
-        //if (isLock)
-        //    m_rigidbody.isKinematic = true;
+        if (inputX != 0 || inputZ != 0)
+        {
+            m_currentTime = 0;
+            m_stateMachine.Owner.transform.rotation = Quaternion.LookRotation(moveDirection);
+        }
+        else
+            m_currentTime += Time.deltaTime;
     }
 }

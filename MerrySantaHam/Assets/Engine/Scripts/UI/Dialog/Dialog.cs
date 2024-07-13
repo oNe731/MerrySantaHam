@@ -26,10 +26,18 @@ public class Dialog : MonoBehaviour
     private void Awake()
     {
         m_cutSceneImg = GetComponent<Image>();
-        m_dialogTxt = transform.GetChild(0).GetComponent<TMP_Text>();
-        m_arrowObj = transform.GetChild(1).gameObject;
+        m_dialogTxt = transform.GetChild(1).GetComponent<TMP_Text>();
+        m_arrowObj = transform.GetChild(2).gameObject;
 
-        //m_cutSceneImage.Add("1", Resources.Load<Sprite>("Textures/Intro/Intro1"));
+        m_cutSceneImage.Add("Intro1", Resources.Load<Sprite>("Textures/2D/Intro/Intro1"));
+        m_cutSceneImage.Add("Intro2", Resources.Load<Sprite>("Textures/2D/Intro/Intro2"));
+        m_cutSceneImage.Add("Intro3", Resources.Load<Sprite>("Textures/2D/Intro/Intro3"));
+        m_cutSceneImage.Add("Intro4", Resources.Load<Sprite>("Textures/2D/Intro/Intro4"));
+        m_cutSceneImage.Add("Intro5", Resources.Load<Sprite>("Textures/2D/Intro/Intro5"));
+        m_cutSceneImage.Add("Intro6", Resources.Load<Sprite>("Textures/2D/Intro/Intro6"));
+        m_cutSceneImage.Add("Intro7", Resources.Load<Sprite>("Textures/2D/Intro/Intro7"));
+        m_cutSceneImage.Add("Intro8", Resources.Load<Sprite>("Textures/2D/Intro/Intro8"));
+        m_cutSceneImage.Add("Intro9", Resources.Load<Sprite>("Textures/2D/Intro/Intro9"));
     }
 
     private void Start()
@@ -44,7 +52,8 @@ public class Dialog : MonoBehaviour
 
     private void Update_Dialog(bool IsPonter = true)
     {
-        if (IsPonter && EventSystem.current.IsPointerOverGameObject())
+        bool isUp = EventSystem.current.IsPointerOverGameObject();
+        if (IsPonter && isUp == true)
             return;
 
         if (m_isTyping)

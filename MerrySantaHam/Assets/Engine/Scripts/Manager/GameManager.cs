@@ -101,7 +101,7 @@ public class GameManager : MonoBehaviour
             return;
 
         m_isGame = false;
-
+        Player.gameObject.GetComponent<Rigidbody>().isKinematic = true;
         Create_GameObject("Prefabs/UI/FinishPanel", GameObject.Find("Canvas").transform);
     }
 

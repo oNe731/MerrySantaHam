@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class House : MonoBehaviour
 {
-    private bool m_registered = false;
-    private bool m_target = false;
-    private int m_orderIndex = -1;
+    [SerializeField] private bool m_registered = false;
+    [SerializeField] private bool m_target = false;
+    [SerializeField] private int m_orderIndex = -1;
+
+    private GameObject m_targetObject;
 
     public bool Registered => m_registered;
     public bool Target => m_target;
@@ -39,10 +41,10 @@ public class House : MonoBehaviour
 
     public void Registered_Target(int orderIndex)
     {
-        Debug.Log(gameObject.name + "에" + m_orderIndex + "주문서 배달 진행");
-
         m_registered = true;
         m_orderIndex = orderIndex;
+
+        Debug.Log(gameObject.name + "에" + m_orderIndex + "주문서 배달 진행");
     }
 
     public void Create_UI()
@@ -52,5 +54,29 @@ public class House : MonoBehaviour
 
         m_target = true;
         Debug.Log(gameObject.name + "에" + m_orderIndex + "주문서 배달 가능");
+
+        m_targetObject = GameManager.Ins.Create_GameObject("Prefabs/UI/UITarget", GameObject.Find("Canvas").transform);
+        if(m_targetObject != null)
+        {
+            m_targetObject.GetComponent<Target>().TargetObject = transform;
+        }
+    }
+
+    public void Reset_Home(bool clear)
+    {
+        m_registered = false;
+        m_target = false;
+
+        m_orderIndex = -1;
+
+        if(clear == true)
+        {
+            if (m_targetObject != null)
+            {
+                Destroy(m_targetObject);
+            }
+        }
+
+        Debug.Log(gameObject.name + "집 초기화");
     }
 }
