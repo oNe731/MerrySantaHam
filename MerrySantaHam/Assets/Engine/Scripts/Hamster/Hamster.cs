@@ -14,6 +14,8 @@ public class Hamster : MonoBehaviour
     private Inventory m_inventory;
     private Rigidbody m_rigidbody;
 
+    private GameObject m_call = null;
+
     public bool IsGrounded => m_isGrounded;
     public int life => m_life;
     public StateMachine<Hamster> StateMachine => m_stateMachine;
@@ -43,18 +45,43 @@ public class Hamster : MonoBehaviour
         m_stateMachine.Update_State();
 
         Check_Ground();
+
+        //if(Input.GetKeyDown(KeyCode.Q))
+        //{
+        //    m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Cloud, 1));
+        //}
+        //if (Input.GetKeyDown(KeyCode.W))
+        //{
+        //    m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Fish, 1));
+        //}
+        //if (Input.GetKeyDown(KeyCode.E))
+        //{
+        //    m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Person, 1));
+        //}
+        //if (Input.GetKeyDown(KeyCode.R))
+        //{
+        //    m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Strawberry, 1));
+        //}
+        //if (Input.GetKeyDown(KeyCode.T))
+        //{
+        //    m_inventory.Add_Item(new Item(Item.ELEMENT.EM_Tree, 1));
+        //}
     }
 
     private void Check_Ground()
     {
         Vector3 origin    = transform.position;
         Vector3 direction = Vector3.down;
-        float distance    = 0.6f;
+        float distance    = 0.8f;
 
         RaycastHit hit;
         m_isGrounded = Physics.Raycast(origin, direction, out hit, distance, LayerMask.GetMask("Ground"));
-        if(m_isGrounded == false)
+        if (m_isGrounded == false) // 중력
+        {
+            if (m_stateMachine.CurState == (int)HamsterState.HT_APPEAR)
+                return;
             m_rigidbody.velocity += Physics.gravity * Time.deltaTime * 300f; // 떨어지는 속도 : 300f
+        }
 
 #if UNITY_EDITOR
         Debug.DrawRay(origin, direction * distance, Color.red);
@@ -64,9 +91,17 @@ public class Hamster : MonoBehaviour
     public void Diminish_Life()
     {
         m_life--;
-        if(m_life <= 0)
+        if (m_life <= 0)
         {
+            if (m_call != null)
+                Destroy(m_call);
             GameManager.Ins.Over_Game();
+        }
+        else
+        {
+            if (m_call == null)
+                m_call = GameManager.Ins.Create_GameObject("Prefabs/UI/CallPanel", GameObject.Find("Canvas").transform); // 전화 UI 생성
+            m_call.GetComponent<Call>().Reset_Call();
         }
     }
 

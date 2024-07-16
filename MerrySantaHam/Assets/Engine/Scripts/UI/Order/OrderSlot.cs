@@ -10,7 +10,8 @@ public class OrderSlot
     private GameObject m_uIItem = null;
 
     private OrderSheets m_orderSheets;
-    private House m_targetHouse = null;
+    //private House m_targetHouse = null;
+    private House m_targetHouse { get; set; }
 
     public int Index => m_index;
     public bool EMPTY => m_empty;
@@ -34,15 +35,20 @@ public class OrderSlot
 
         m_uIItem = GameManager.Ins.Create_GameObject("Prefabs/UI/UIOrder", GameObject.Find("Canvas").transform);
         m_uIItem.GetComponent<RectTransform>().anchoredPosition = Get_Position();
-        m_uIItem.GetComponent<UIOrder>().Initialize_UIOrder(this);
 
         m_targetHouse = GameManager.Ins.Create_Target(m_index);
+
+        m_uIItem.GetComponent<UIOrder>().Initialize_UIOrder(this);
+
+
 
         m_empty = false;
     }
 
     public void Set_Order(int index, Order OrderInfo, House house)
     {
+        Debug.Log("!!");
+
         Reset_Slot();
 
         m_index = index;
@@ -50,9 +56,12 @@ public class OrderSlot
 
         m_uIItem = GameManager.Ins.Create_GameObject("Prefabs/UI/UIOrder", GameObject.Find("Canvas").transform);
         m_uIItem.GetComponent<RectTransform>().anchoredPosition = Get_Position();
-        m_uIItem.GetComponent<UIOrder>().Initialize_UIOrder(this);
 
         m_targetHouse = house;
+
+        m_uIItem.GetComponent<UIOrder>().Initialize_UIOrder(this);
+
+        //m_targetHouse = house;
         m_targetHouse.Registered_Target(m_index);
 
         m_empty = false;
@@ -113,6 +122,12 @@ public class OrderSlot
         Reset_Slot();
 
         m_targetHouse.Reset_Home(clear);
+
+        //m_targetHouse.TargetObject.SetActive(false);
+
         m_targetHouse = null;
+
+        //GameManager.Ins.Destroy_GameObject(ref m_targetHouse.TargetObject);
+
     }
 }

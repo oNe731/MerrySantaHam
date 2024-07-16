@@ -21,19 +21,19 @@ public class UIItem : MonoBehaviour
             switch (item.itemType)
             {
                 case Item.ELEMENT.EM_Tree:
-                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/Wood");
+                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_Wood");
                     break;
                 case Item.ELEMENT.EM_Cloud:
-                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/Cloud");
+                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_Cloud");
                     break;
                 case Item.ELEMENT.EM_Fish:
-                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/Fish");
+                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_Fish");
                     break;
                 case Item.ELEMENT.EM_Person:
-                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/CitizenHat");
+                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_SnowManHat");
                     break;
                 case Item.ELEMENT.EM_Strawberry:
-                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/Strawberry");
+                    sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_Strawberry");
                     break;
             }
             m_itemImg.sprite = sprite;

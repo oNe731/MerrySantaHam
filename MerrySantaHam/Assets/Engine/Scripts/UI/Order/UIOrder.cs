@@ -260,6 +260,9 @@ public class UIOrder : MonoBehaviour
                 return;
 
             m_over = true;
+
+            Debug.Log(m_orderSlot.Index);
+
             m_orderSlot.OrderSheet.Use_Order(m_orderSlot.Index, false);
 
             Destroy(gameObject);

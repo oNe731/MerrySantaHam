@@ -10,6 +10,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject m_hamsterObject;
 
+    [SerializeField] private AudioClip m_inGameSr;
+    [SerializeField] private AudioClip m_OverSr;
+
     private bool m_isGame = false;
     private int m_score = 0;
     public bool IsGame
@@ -55,6 +58,9 @@ public class GameManager : MonoBehaviour
         UI.Start_FadeIn(1f, Color.black);
 
         m_hamsterObject.SetActive(true);
+
+        Camera.main.GetComponent<AudioSource>().clip = m_inGameSr;
+        Camera.main.GetComponent<AudioSource>().Play();
     }
 
     private void Update()
@@ -103,6 +109,10 @@ public class GameManager : MonoBehaviour
         m_isGame = false;
         Player.gameObject.GetComponent<Rigidbody>().isKinematic = true;
         Create_GameObject("Prefabs/UI/FinishPanel", GameObject.Find("Canvas").transform);
+
+        Camera.main.GetComponent<AudioSource>().loop = false;
+        Camera.main.GetComponent<AudioSource>().clip = m_OverSr;
+        Camera.main.GetComponent<AudioSource>().Play();
     }
 
     public House Create_Target(int orderIndex)
@@ -113,6 +123,16 @@ public class GameManager : MonoBehaviour
         while(true)
         {
             int index = Random.Range(0, m_houses.Count);
+
+            for (int i = 0; i < m_houses.Count; ++i)
+            {
+                if (m_houses[i].OrderIndex == orderIndex)
+                {
+                    m_houses[i].Reset_Home(false);
+                    break;
+                }
+            }
+
             if(m_houses[index].Registered == false)
             {
                 m_houses[index].Registered_Target(orderIndex);

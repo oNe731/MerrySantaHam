@@ -12,6 +12,10 @@ public class House : MonoBehaviour
 
     public bool Registered => m_registered;
     public bool Target => m_target;
+    public int OrderIndex { get => m_orderIndex; set => m_orderIndex = value; }
+
+
+        public GameObject TargetObject => m_targetObject;
 
     private void Start()
     {
@@ -53,13 +57,11 @@ public class House : MonoBehaviour
             return;
 
         m_target = true;
-        Debug.Log(gameObject.name + "에" + m_orderIndex + "주문서 배달 가능");
+        //Debug.Log(gameObject.name + "에" + m_orderIndex + "주문서 배달 가능");
 
         m_targetObject = GameManager.Ins.Create_GameObject("Prefabs/UI/UITarget", GameObject.Find("Canvas").transform);
         if(m_targetObject != null)
-        {
             m_targetObject.GetComponent<Target>().TargetObject = transform;
-        }
     }
 
     public void Reset_Home(bool clear)
@@ -69,13 +71,8 @@ public class House : MonoBehaviour
 
         m_orderIndex = -1;
 
-        if(clear == true)
-        {
-            if (m_targetObject != null)
-            {
-                Destroy(m_targetObject);
-            }
-        }
+        if (m_targetObject != null)
+            Destroy(m_targetObject);
 
         Debug.Log(gameObject.name + "집 초기화");
     }

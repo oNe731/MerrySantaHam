@@ -22,37 +22,37 @@ public class Order
                     objectType = OBJECT.OJ_StrawberryFish;
                     elements.Add(Item.ELEMENT.EM_Strawberry);
                     elements.Add(Item.ELEMENT.EM_Fish);
-                    maxTimer = 10f;
+                    maxTimer = 20f;
                     break;
 
                 case 1:
                     objectType = OBJECT.OJ_FishTanghulu;
                     elements.Add(Item.ELEMENT.EM_Fish);
-                    elements.Add(Item.ELEMENT.EM_Fish);
                     elements.Add(Item.ELEMENT.EM_Tree);
-                    maxTimer = 15f;
+                    elements.Add(Item.ELEMENT.EM_Tree);
+                    maxTimer = 20f;
                     break;
 
                 case 2:
                     objectType = OBJECT.OJ_SmallFishTank;
                     elements.Add(Item.ELEMENT.EM_Fish);
-                    elements.Add(Item.ELEMENT.EM_Cloud);
-                    maxTimer = 20f;
+                    elements.Add(Item.ELEMENT.EM_Tree);
+                    maxTimer = 30f;
                     break;
 
                 case 3:
                     objectType = OBJECT.OJ_SantaHat;
                     elements.Add(Item.ELEMENT.EM_Person);
                     elements.Add(Item.ELEMENT.EM_Cloud);
-                    maxTimer = 25f;
+                    maxTimer = 40f;
                     break;
 
                 case 4:
                     objectType = OBJECT.OJ_VoodooDoll;
                     elements.Add(Item.ELEMENT.EM_Tree);
+                    elements.Add(Item.ELEMENT.EM_Tree);
                     elements.Add(Item.ELEMENT.EM_Person);
-                    elements.Add(Item.ELEMENT.EM_Cloud);
-                    maxTimer = 30f;
+                    maxTimer = 40f;
                     break;
             }
             level = randomIndex;
