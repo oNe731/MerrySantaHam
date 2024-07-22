@@ -9,7 +9,10 @@ public class Acceleration : MonoBehaviour
         if (collision.gameObject.name == "Hamster")
         {
             // °¡¼Ó
-            GameManager.Ins.Player.Add_Acceleration();
+            Hamster_Run state = (Hamster_Run)GameManager.Ins.Player.StateMachine.CurState;
+            if (state == null)
+                return;
+            state.Add_Acceleration();
         }
     }
 }

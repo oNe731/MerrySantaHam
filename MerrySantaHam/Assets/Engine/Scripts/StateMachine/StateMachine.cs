@@ -9,9 +9,11 @@ public class StateMachine<T> where T : class
     private int m_preState = -1;
     private List<State<T>> m_states;
 
-    public GameObject Owner { get { return m_owner; } }
-    public int CurState { get { return m_curState; } }
-    public int PreState { get { return m_preState; } }
+    public GameObject Owner { get => m_owner; }
+    public State<T> CurState { get => m_states[m_curState]; }
+    public State<T> PreState { get => m_states[m_preState]; }
+    public int CurStateIndex { get => m_curState; }
+    public int PreStateIndex { get => m_preState; }
 
     public StateMachine(GameObject owner)
     {
