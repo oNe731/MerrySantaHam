@@ -5,74 +5,57 @@ using UnityEngine;
 public class House : MonoBehaviour
 {
     [SerializeField] private bool m_registered = false;
-    [SerializeField] private bool m_target = false;
-    [SerializeField] private int m_orderIndex = -1;
-
-    private GameObject m_targetObject;
+    [SerializeField] private bool m_available  = false;
+    [SerializeField] private int  m_orderID = -1;
 
     public bool Registered => m_registered;
-    public bool Target => m_target;
-    public int OrderIndex { get => m_orderIndex; set => m_orderIndex = value; }
 
-
-        public GameObject TargetObject => m_targetObject;
 
     private void Start()
     {
         GameManager.Ins.Houses.Add(this);
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        
+        if(m_registered == true && GameManager.Ins.Player.OrderSheets.Check_OrdersID(m_orderID) == false)
+            Reset_Home();
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (m_target == false)
+        if (m_available == false || m_orderID == -1)
             return;
 
         // 배달 완료
         if (collision.gameObject.name == "Hamster")
-        {
-            GameManager.Ins.Player.OrderSheets.Clear_Order(m_orderIndex);
-
-            m_registered = false;
-            m_target = false;
-            m_orderIndex = -1;
-        }
+            GameManager.Ins.Player.OrderSheets.Clear_Order(m_orderID);
     }
 
-    public void Registered_Target(int orderIndex)
+    public void Reserve_Target(int orderID)
     {
         m_registered = true;
-        m_orderIndex = orderIndex;
+        m_orderID    = orderID;
 
-        Debug.Log(gameObject.name + "에" + m_orderIndex + "주문서 배달 진행");
+        Debug.Log(gameObject.name + "집 예약");
     }
 
-    public void Create_UI()
+    public void Available_Target(bool available)
     {
-        if (m_target == true)
+        if (m_registered == false || m_orderID == -1)
             return;
 
-        m_target = true;
-        //Debug.Log(gameObject.name + "에" + m_orderIndex + "주문서 배달 가능");
-
-        m_targetObject = GameManager.Ins.Create_GameObject("Prefabs/UI/UITarget", GameObject.Find("Canvas").transform);
-        if(m_targetObject != null)
-            m_targetObject.GetComponent<Target>().TargetObject = transform;
+        m_available = available;
+        if(m_available == true)
+            Debug.Log(gameObject.name + "집 배달");
     }
 
-    public void Reset_Home(bool clear)
+    private void Reset_Home()
     {
         m_registered = false;
-        m_target = false;
+        m_available  = false;
 
-        m_orderIndex = -1;
-
-        if (m_targetObject != null)
-            Destroy(m_targetObject);
+        m_orderID = -1;
 
         Debug.Log(gameObject.name + "집 초기화");
     }

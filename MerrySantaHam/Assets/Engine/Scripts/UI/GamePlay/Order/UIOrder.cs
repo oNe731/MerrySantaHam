@@ -7,57 +7,56 @@ using System;
 public class UIOrder : MonoBehaviour
 {
     private List<GameObject> m_slots = new List<GameObject>();
-    public List<Item.ELEMENT> m_elements;
-
-    private Dictionary<string, Sprite> m_orderSpr   = new Dictionary<string, Sprite>();
-    private Dictionary<string, Sprite> m_elementSpr = new Dictionary<string, Sprite>();
 
     private Image m_timerImg;
+    private RectTransform m_rectTransform;
 
-    private bool m_possible = false;
+    private Target m_uItarget = null;
+
+    private Quaternion m_startRotation;
+
+    Sprite activeSprite;
+    Sprite inactiveSprite;
+    //
+
+    private Coroutine m_coroutine = null;
     private bool m_timeOver = false;
+    private bool m_down = false;
+    private bool m_clear = false;
+    private bool m_over = false;
+    //
 
+    private OrderSlot m_orderSlot = null;
+    private Vector3 m_startPosition;
+    private Vector3 m_targetPosition;
+    private float m_heightArc; // 포물선의 높이
+    private float m_moveSpeed; // 이동 속도
+    private Quaternion m_targetRotation;
+    private float m_rotationSpeed = 500.0f; // 회전 속도
 
-    private float m_minShakeTime = 0.5f;
-    private float m_maxShakeTime = 0.8f;
+    //
+    private float m_minShakeTime   = 0.5f;
+    private float m_maxShakeTime   = 0.8f;
     private float m_minShakeAmount = 500f;
     private float m_maxShakeAmount = 1000f;
 
     private float m_minTargetX = -100f;
     private float m_maxTargetX = 100f;
     private float m_setTargetY = -700f;
-    private float m_minHeight = 300f;
-    private float m_maxHeight = 400f;
-    private float m_minMoveSpeed = 20f;
-    private float m_maxMoveSpeed = 25f;
+    private float m_minHeight = 400f;
+    private float m_maxHeight = 500f;
 
-    private bool m_rotation = false;
+    private float m_minMoveSpeed = 500f;
+    private float m_maxMoveSpeed = 800f;
+
+    private bool  m_rotation = false;
     private float m_minAngle = -70f;
     private float m_maxAngle = 70f;
     private float m_minRotationSpeed = -50f;
     private float m_maxRotationSpeed = 50f;
 
-
-    private float m_shakeTime = 0.5f;
+    private float m_shakeTime   = 0.5f;
     private float m_shakeAmount = 1000f;
-
-    private bool m_down = false;
-    private Vector3 m_targetPosition;
-    private float m_heightArc; // 포물선의 높이
-    private float m_moveSpeed; // 이동 속도
-
-    private Quaternion m_startRotation;
-    private Quaternion m_targetRotation;
-    private float m_rotationSpeed = 500.0f; // 회전 속도
-
-    private RectTransform m_rectTransform = null;
-    private Vector3 m_startPosition;
-    private Coroutine m_shakeCoroutine = null;
-
-    private OrderSlot m_orderSlot = null;
-
-    private bool m_clear = false;
-    private bool m_over = false;
 
     public bool Down 
     {
@@ -65,102 +64,62 @@ public class UIOrder : MonoBehaviour
         set => m_down = value; 
     }
     public bool Clear { get => m_clear; }
+    public Target TargetUI => m_uItarget;
 
-    public void Initialize_UIOrder(OrderSlot orderSlot)
+    public void Initialize_UIOrder()
     {
-        m_orderSlot = orderSlot; 
-
-        // 초기화
-        m_orderSpr.Add("BadDoll",   Resources.Load<Sprite>("Textures/2D/UI/Order/OrderItem/BadDoll"));
-        m_orderSpr.Add("FishSugar", Resources.Load<Sprite>("Textures/2D/UI/Order/OrderItem/FishSugar"));
-        m_orderSpr.Add("FishTank",  Resources.Load<Sprite>("Textures/2D/UI/Order/OrderItem/FishTank"));
-        m_orderSpr.Add("SantaHat",  Resources.Load<Sprite>("Textures/2D/UI/Order/OrderItem/SantaHat"));
-        m_orderSpr.Add("StrawberryFish", Resources.Load<Sprite>("Textures/2D/UI/Order/OrderItem/StrawberryFish"));
-
-        m_elementSpr.Add("CitizenHat", Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_SnowManHat"));
-        m_elementSpr.Add("Cloud", Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_Cloud"));
-        m_elementSpr.Add("Fish",  Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_Fish"));
-        m_elementSpr.Add("Strawberry", Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_Strawberry"));
-        m_elementSpr.Add("Wood",  Resources.Load<Sprite>("Textures/2D/UI/Order/Element/UI_Element_Wood"));
-
         for (int i = 0; i < 3; ++i)
         {
             m_slots.Add(GameManager.Ins.Create_GameObject("Prefabs/UI/OrderSlot", transform.GetChild(3)));
         }
 
-
-        m_timerImg = transform.GetChild(0).GetComponent<Image>();
+        m_timerImg      = transform.GetChild(0).GetComponent<Image>();
         m_rectTransform = GetComponent<RectTransform>();
-        m_startPosition = m_rectTransform.anchoredPosition;
         m_startRotation = m_rectTransform.rotation;
-        Set_Value();
 
-        // 아이템 이미지 할당
-        Sprite sprite = null;
-        switch (m_orderSlot.OrderInfo.objectType)
-        {
-            case Order.OBJECT.OJ_FishTanghulu:
-                sprite = m_orderSpr["FishSugar"];
-                break;
-            case Order.OBJECT.OJ_SantaHat:
-                sprite = m_orderSpr["SantaHat"];
-                break;
-            case Order.OBJECT.OJ_SmallFishTank:
-                sprite = m_orderSpr["FishTank"];
-                break;
-            case Order.OBJECT.OJ_StrawberryFish:
-                sprite = m_orderSpr["StrawberryFish"];
-                break;
-            case Order.OBJECT.OJ_VoodooDoll:
-                sprite = m_orderSpr["BadDoll"];
-                break;
-        }
-        transform.GetChild(1).GetComponent<Image>().sprite = sprite;
+        // 리소스 로드 최적화
+        activeSprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Slot/UI_order_Element_Uses");
+        inactiveSprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Slot/UI_order_Element");
+
+        // 화살표 생성
+        GameObject gameobject = GameManager.Ins.Create_GameObject("Prefabs/UI/UITarget", transform);
+        gameobject.SetActive(false);
+        m_uItarget = gameobject.GetComponent<Target>();
+    }
+
+    public void Set_UIOrder(OrderSlot orderSlot)
+    {
+        if (m_coroutine != null)
+            StopCoroutine(m_coroutine);
+        m_timeOver = false;
+        m_down     = false;
+        m_clear    = false;
+        m_over     = false;
+
+
+        m_orderSlot = orderSlot; 
+
+        // 배달 아이템 이미지 할당
+        transform.GetChild(1).GetComponent<Image>().sprite = orderSlot.OrderSheet.OrderSprite[m_orderSlot.OrderInfo.objectType.ToString()];
 
         // 요소 이미지 할당
-        m_elements = m_orderSlot.OrderInfo.elements;
-        for (int i = 0; i < m_elements.Count; ++i)
+        for (int i = 0; i < m_orderSlot.OrderInfo.elements.Count; ++i)
         {
-            switch (m_elements[i])
-            {
-                case Item.ELEMENT.EM_Tree:
-                    sprite = m_elementSpr["Wood"];
-                    break;
-                case Item.ELEMENT.EM_Cloud:
-                    sprite = m_elementSpr["Cloud"];
-                    break;
-                case Item.ELEMENT.EM_Fish:
-                    sprite = m_elementSpr["Fish"];
-                    break;
-                case Item.ELEMENT.EM_Person:
-                    sprite = m_elementSpr["CitizenHat"];
-                    break;
-                case Item.ELEMENT.EM_Strawberry:
-                    sprite = m_elementSpr["Strawberry"];
-                    break;
-            }
-
-            if(i >= m_slots.Count)
+            if(i >= m_slots.Count || m_slots[i] == null)
                 break;
 
-            if (m_slots[i] == null)
-                break;
-
-            Transform transform = m_slots[i].transform.GetChild(0);
-            if (transform == null)
-                break;
-
-            Image image = transform.GetComponent<Image>();
-            if (image == null)
-                break;
-            image.sprite = sprite;
-
-            transform.gameObject.SetActive(true);
+            m_slots[i].transform.GetChild(0).GetComponent<Image>().sprite = GameManager.Ins.Player.Inventory.ItemSprite[m_orderSlot.OrderInfo.elements[i].ToString()];
+            m_slots[i].transform.GetChild(0).gameObject.SetActive(true);
         }
 
         Update_TimerColor();
-        Check_Slots(GameManager.Ins.Player.Inventory.Slots);
+        Set_Value();
+
+        m_startPosition = m_rectTransform.anchoredPosition;
+
+        Check_Slots();
     }
+
 
     private void Set_Value()
     {
@@ -169,12 +128,7 @@ public class UIOrder : MonoBehaviour
 
         m_targetPosition = new Vector3(UnityEngine.Random.Range(m_minTargetX, m_maxTargetX), m_setTargetY, 0);
         m_heightArc = UnityEngine.Random.Range(m_minHeight, m_maxHeight);
-        m_moveSpeed = Mathf.Lerp(m_minMoveSpeed, m_maxMoveSpeed, (m_heightArc - m_minHeight) / (m_maxHeight - m_minHeight));
-        float angle = Vector3.Angle((m_startPosition - m_targetPosition).normalized, Vector3.up); // 각도에 따른 속도 조절
-        if (angle < 90)
-            angle = 90 + (90 - angle);
-        float result = (90 - Mathf.Abs(angle - 90));
-        m_moveSpeed *= result;
+        m_moveSpeed = UnityEngine.Random.Range(m_minMoveSpeed, m_maxMoveSpeed);
 
         m_targetRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(m_minAngle, m_maxAngle));
         m_rotationSpeed = UnityEngine.Random.Range(m_minRotationSpeed, m_maxRotationSpeed);
@@ -182,16 +136,6 @@ public class UIOrder : MonoBehaviour
 
     private void Update()
     {
-        // Test
-        //if (Input.GetKeyDown(KeyCode.S))
-        //{
-        //    m_rectTransform.anchoredPosition = m_startPosition;
-        //    m_rectTransform.rotation = m_startRotation;
-        //    Set_Value();
-
-        //    Shake_Object();
-        //}
-
         if (GameManager.Ins.IsGame == false || m_clear == true)
             return;
 
@@ -204,12 +148,10 @@ public class UIOrder : MonoBehaviour
     private void Update_Timer()
     {
         m_orderSlot.OrderInfo.currentTimer -= Time.deltaTime;
-        if(m_orderSlot.OrderInfo.currentTimer <= 0) // 실패
+        if (m_orderSlot.OrderInfo.currentTimer <= 0) // 실패
         {
             m_orderSlot.OrderInfo.currentTimer = 0;
             Shake_Object();
-
-            m_timeOver = true;
         }
 
         Update_TimerColor();
@@ -234,6 +176,8 @@ public class UIOrder : MonoBehaviour
 
         m_timerImg.color = color;
     }
+
+
 
     private void Update_Move()
     {
@@ -260,12 +204,7 @@ public class UIOrder : MonoBehaviour
                 return;
 
             m_over = true;
-
-            Debug.Log(m_orderSlot.Index);
-
             m_orderSlot.OrderSheet.Use_Order(m_orderSlot.Index, false);
-
-            Destroy(gameObject);
         }
     }
 
@@ -274,9 +213,11 @@ public class UIOrder : MonoBehaviour
         if (m_timeOver == true)
             return;
 
-        if (m_shakeCoroutine != null)
-            StopCoroutine(m_shakeCoroutine);
-        m_shakeCoroutine = StartCoroutine(Shake(isAction));
+        m_uItarget.Reset_Arrow();
+        m_orderSlot.OrderInfo.targetHouse.Available_Target(false);
+
+        m_timeOver = true;
+        m_coroutine = StartCoroutine(Shake(isAction));
     }
 
     public IEnumerator Shake(Action isAction)
@@ -305,82 +246,7 @@ public class UIOrder : MonoBehaviour
         yield break;
     }
 
-    public void Check_Slots(List<InvenSlot> slots)
-    {
-        if (m_elements == null)
-            return;
 
-        int sameCount = 0;
-        for (int i = 0; i < m_elements.Count; ++i) // 해당 주문서의 요소
-        {
-            for(int j = 0; j < slots.Count; ++j) // 인벤토리
-            {
-                if(slots[j].EMPTY == false) // 아이템이 존재할 시
-                {
-                    if (m_elements[i] == slots[j].Item.itemType) // 해당 요소와 인벤토리 요소와 같을 시
-                    {
-                        // 같은 그룹 내 같은 요소 타입이 있는지
-                        int sameElementCounts = 0;
-                        for (int r = 0; r < slots.Count; ++r)
-                        {
-                            if (i == r) // 같은 요소 번호는 건너뜀
-                                break;
-
-                            if (m_elements[i] == m_elements[r])
-                                sameElementCounts++;
-                        }
-
-                        // 중복 요소보다 더 많을 시 불 활성화
-                        if(slots[j].Item.count > sameElementCounts)
-                        {
-                            if(i >= m_slots.Count)
-                            {
-                                return;
-                            }
-                            m_slots[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Slot/UI_order_Element_Uses");
-                            sameCount++;
-                        }
-                    }
-                    //else // 나머지 타입과도 중복이 아닌지 검사
-                    //{
-                    //    bool same = false;
-                    //    for (int k = 0; k < slots.Count; ++k)
-                    //    {
-                    //        if (slots[k].EMPTY == false)
-                    //        {
-                    //            if (m_elements[i] == slots[k].Item.itemType)
-                    //            {
-                    //                // 개수
-                    //                if (slots[k].Item.count > 0)
-                    //                {
-                    //                    same = true;
-                    //                    break;
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-
-                    //    // 중복이 전혀 없을 시 초기화
-                    //    if(same == false)
-                    //        m_slots[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("Textures/2D/UI/Order/Slot/UI_order_Element");
-                    //}
-                }
-            }
-        }
-
-        if (sameCount == m_elements.Count)
-        {
-            if (m_possible == true)
-                return;
-            m_possible = true;
-
-            if (m_orderSlot == null)
-                return;
-            if (m_orderSlot.TargetHouse == null)
-                return;
-            m_orderSlot.TargetHouse.Create_UI();
-        }
-    }
 
 
     public void Close_Move()
@@ -389,7 +255,7 @@ public class UIOrder : MonoBehaviour
             return;
 
         m_clear = true;
-        StartCoroutine(Coroutine_Move(m_startPosition, new Vector3(m_startPosition.x, m_startPosition.y + 250f, m_startPosition.z), 0.5f, false));
+        m_coroutine = StartCoroutine(Coroutine_Move(m_startPosition, new Vector3(m_startPosition.x, m_startPosition.y + 250f, m_startPosition.z), 0.5f, false));
     }
 
     IEnumerator Coroutine_Move(Vector3 startPosition, Vector3 targetPosition, float duration, bool active)
@@ -420,8 +286,71 @@ public class UIOrder : MonoBehaviour
             GameManager.Ins.Score += 150;
         else
             GameManager.Ins.Score += 100;
-
-        Destroy(gameObject);
     }
 
+
+
+    public void Check_Slots()
+    {
+        if (m_timeOver == true || m_clear == true)
+            return;
+
+        List<Item.ELEMENT> elements = m_orderSlot.OrderInfo.elements;
+        List<InvenSlot> inven = GameManager.Ins.Player.Inventory.Slots;
+        if (elements == null || inven == null)
+            return;
+
+        // 요소의 등장 횟수를 추적
+        Dictionary<Item.ELEMENT, int> elementOccurrences = new Dictionary<Item.ELEMENT, int>();
+
+        // 주문서의 엘레멘트 요소 검사
+        int sameCount = 0;
+        for (int i = 0; i < elements.Count; ++i)
+        {
+            bool elementFound = false;
+            Item.ELEMENT currentElement = elements[i];
+
+            // 현재 요소 등장 횟수 증가
+            if (!elementOccurrences.ContainsKey(currentElement))
+                elementOccurrences[currentElement] = 1;
+            else
+                elementOccurrences[currentElement]++;
+
+            // 인벤토리의 아이템과 비교
+            int requiredCount = elementOccurrences[currentElement]; // 현재 요소가 몇 번째 중복 요소인지
+            for (int j = 0; j < inven.Count; ++j)
+            {
+                if (inven[j].Item != null && inven[j].Item.itemType == currentElement)
+                {
+                    if (inven[j].Item.count >= requiredCount)
+                    {
+                        elementFound = true;
+                        break;
+                    }
+                }
+            }
+
+            if (elementFound)
+            {
+                m_slots[i].GetComponent<Image>().sprite = activeSprite;
+                sameCount++;
+            }
+            else
+            {
+                m_slots[i].GetComponent<Image>().sprite = inactiveSprite;
+            }
+        }
+
+        // 모든 요소가 만족되었을 때 배달 가능 상태로 변경
+        if (sameCount == elements.Count)
+        {
+            m_uItarget.Start_Arrow(m_orderSlot.OrderInfo.targetHouse);
+            m_orderSlot.OrderInfo.targetHouse.Available_Target(true);
+        }
+        else
+        {
+            m_uItarget.Reset_Arrow();
+            m_orderSlot.OrderInfo.targetHouse.Available_Target(false);
+        }
+    }
 }

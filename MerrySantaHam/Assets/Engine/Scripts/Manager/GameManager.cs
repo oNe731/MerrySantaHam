@@ -85,7 +85,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public House Create_Target(int orderIndex)
+    public House Create_Target(int orderID)
     {
         if (m_houses.Count < 3) // 주문서 최대 개수 3개
             return null;
@@ -93,19 +93,9 @@ public class GameManager : MonoBehaviour
         while (true)
         {
             int index = Random.Range(0, m_houses.Count);
-
-            for (int i = 0; i < m_houses.Count; ++i)
-            {
-                if (m_houses[i].OrderIndex == orderIndex)
-                {
-                    m_houses[i].Reset_Home(false);
-                    break;
-                }
-            }
-
             if (m_houses[index].Registered == false)
             {
-                m_houses[index].Registered_Target(orderIndex);
+                m_houses[index].Reserve_Target(orderID);
                 return m_houses[index];
             }
         }

@@ -17,14 +17,14 @@ public class FinishPanel : MonoBehaviour
     private void Start()
     {
         int level = 0;
-        if(GameManager.Ins.Score >= 1000)
+        if(GameManager.Ins.Score >= 700)
         {
             level = 3;
             m_EvaluationTxt.text = "매년 회사를위해 헌신하는 산타햄,\n귀하에게 무궁한 영광이 함께하기를 빕니다!";
             m_Employee.text = "우수 사원";
             m_ProfileImage.sprite = m_profile[2];
         }
-        else if (GameManager.Ins.Score >= 500)
+        else if (GameManager.Ins.Score >= 350)
         {
             level = 2;
             m_EvaluationTxt.text = "올해 크리스마스도 열심히 노력한 산타햄!\n앞으로도 더욱 노력해주세요!";

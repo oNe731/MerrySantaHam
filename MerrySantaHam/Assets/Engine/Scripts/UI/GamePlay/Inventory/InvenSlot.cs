@@ -1,82 +1,79 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InvenSlot
 {
-    private int m_index = -1;
-    private bool m_empty = true;
+    private int  m_index = -1;
     private Item m_item = null;
-    private GameObject m_uIItem = null;
 
     private Inventory m_inventory = null;
+    private UIItem m_uiItem = null;
 
-    public bool EMPTY => m_empty;
     public Item Item => m_item;
     public Inventory Inventory { set => m_inventory = value; }
 
-    public InvenSlot(int index)
+    public InvenSlot(Inventory inventory, int index)
     {
-        m_index = index;
+        m_inventory = inventory;
+        m_index     = index;
+
+        GameObject gameObject = GameManager.Ins.Create_GameObject("Prefabs/UI/UIItem", GameObject.Find("Canvas").transform.GetChild(1).GetChild(3));
+        gameObject.SetActive(false);
+        m_uiItem = gameObject.GetComponent<UIItem>();
+
+        float positionY = 0f;
+        switch (m_index)
+        {
+            case 0:
+                positionY = 255f;
+                break;
+            case 1:
+                positionY = 185f;
+                break;
+            case 2:
+                positionY = 115f;
+                break;
+            case 3:
+                positionY = 45f;
+                break;
+            case 4:
+                positionY = -25f;
+                break;
+        }
+        gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-910f, positionY);
     }
 
-    public void Add_Item(Item item, GameObject gameObject = null)
+    public void Add_Item(bool increase, Item item)
     {
-        if (gameObject != null) // 아이템 추가
+        if(increase == false)
         {
-            Reset_Slot();
-            m_uIItem = gameObject;
             m_item = item;
 
-            // 위치 지정
-            float positionY = 0f;
-            switch(m_index)
-            {
-                case 0:
-                    positionY = 255f;
-                    break;
-                case 1:
-                    positionY = 185f;
-                    break;
-                case 2:
-                    positionY = 115f;
-                    break;
-                case 3:
-                    positionY = 45f;
-                    break;
-                case 4:
-                    positionY = -25f;
-                    break;
-            }
-            m_uIItem.GetComponent<RectTransform>().anchoredPosition = new Vector2(-910f, positionY);
-
-            m_empty = false;
+            m_uiItem.gameObject.SetActive(true);
+            m_uiItem.Set_ItemInfo(m_inventory, m_item);
         }
         else
         {
-            if (m_item.count >= 3)
+            if (m_item.count >= 3) // 최대 개수 제한
                 return;
-            m_item.count += item.count;
-        }
 
-        m_uIItem.GetComponent<UIItem>().Set_Info(m_item);
+            m_item.count += item.count;
+            m_uiItem.Set_ItemInfo(m_inventory, m_item);
+        }
     }
 
     public void Reset_Slot()
     {
-        m_empty = true;
-        m_item = null;
-
-        if (m_uIItem != null)
-            GameManager.Ins.Destroy_GameObject(ref m_uIItem);
+        m_item  = null;
+        m_uiItem.gameObject.SetActive(false);
     }
 
     public void Use_Item()
     {
         m_item.count--;
+
         if(m_item.count <= 0)
             Reset_Slot();
         else
-            m_uIItem.GetComponent<UIItem>().Set_Info(m_item);
+            m_uiItem.Set_ItemInfo(m_inventory, m_item);
     }
 }
